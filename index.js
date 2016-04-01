@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 
 var app = express();
-var appPort = process.argv[2] || 8090;
+var appPort = process.argv[2] || process.env.PORT || 8090;
 
 app.use(bodyParser.json());
 
