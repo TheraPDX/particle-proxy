@@ -1,19 +1,25 @@
+/* global require */
+
 var express = require('express');
 var bodyParser = require('body-parser');
+var findDevices = require('./findDevices');
 
 var app = express();
 var appPort = process.argv[2] || process.env.PORT || 8090;
 var proxyAuthToken = process.argv[3] || process.env.PROXY_AUTH_TOKEN;
 var particleAuthToken = process.argv[4] || process.env.PARTICLE_AUTH_TOKEN;
 
-var devices = [];
+var devices = findDevices(5);
 var router = express.Router();
 
 app.use(bodyParser.json());
 
 app.use('*', (req, res, next) => {
-    if (req.headers.authorization.split(' ')[1] !== proxyAuthToken) {
+    if (!req.headers.authorization) {
         res.status(403).json({ status: 403, message: 'No auth token found' });
+    }
+    else if (req.headers.authorization.split(' ')[1] !== proxyAuthToken) {
+        res.status(403).json({ status: 403, message: 'Auth token malformed' });
     }
     else {
         next();
