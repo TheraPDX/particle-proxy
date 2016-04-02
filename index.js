@@ -12,7 +12,7 @@ var router = express.Router();
 app.use(bodyParser.json());
 
 app.use('*', (req, res, next) => {
-    if (req.headers.authorization !== proxyAuthToken) {
+    if (req.headers.authorization.split(' ')[1] !== proxyAuthToken) {
         res.status(403).json({ status: 403, message: 'No auth token found' });
     }
     else {
@@ -22,7 +22,7 @@ app.use('*', (req, res, next) => {
 
 router.get('/status', (req, res) => {
     res.status(200).json({
-        status: '200',
+        apiStatus: 'okay',
         proxyTokenFound: !!proxyAuthToken,
         particleTokenFound: !!particleAuthToken,
         devicesRegistered: devices.length
