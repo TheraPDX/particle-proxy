@@ -59,6 +59,15 @@ router.get('/devices/:id', (req, res) => {
     });
 });
 
+router.get('/devices/:id/:variable', (req, res) => {
+    particle.getVariable(particleAuthToken, req.params.id, req.params.variable).then(result => {
+        res.status(200).json(result);
+    }).catch(response => {
+        console.log(response.options);
+        res.status(response.statusCode).json(response.error);
+    });
+});
+
 app.use('/api/v1', router);
 
 console.log('listening on port ' + appPort);
