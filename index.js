@@ -16,6 +16,18 @@ var particleAuthToken = process.argv[4] || process.env.PARTICLE_AUTH_TOKEN;
 var devices = findDevices(5);
 var router = express.Router();
 
+function getApiStatus() {
+    if (!proxyAuthToken || !particleAuthToken) {
+        return 'error - no auth';
+    }
+    else if (devices.length === 0) {
+        return 'error - no devices';
+    }
+    else {
+        return 'okay';
+    }
+}
+
 app.use(bodyParser.json());
 
 app.use('*', (req, res, next) => {
@@ -32,7 +44,7 @@ app.use('*', (req, res, next) => {
 
 router.get('/status', (req, res) => {
     res.status(200).json({
-        apiStatus: 'okay',
+        apiStatus: getApiStatus(),
         proxyTokenFound: !!proxyAuthToken,
         particleTokenFound: !!particleAuthToken,
         devicesRegistered: devices.length
