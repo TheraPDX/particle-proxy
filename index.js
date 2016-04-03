@@ -2,7 +2,11 @@
 
 var express = require('express');
 var bodyParser = require('body-parser');
+var _ = require('lodash');
+var request = require('request-promise');
+
 var findDevices = require('./findDevices');
+var particle = require('./particle-throttled');
 
 var app = express();
 var appPort = process.argv[2] || process.env.PORT || 8090;
@@ -32,6 +36,26 @@ router.get('/status', (req, res) => {
         proxyTokenFound: !!proxyAuthToken,
         particleTokenFound: !!particleAuthToken,
         devicesRegistered: devices.length
+    });
+});
+
+router.get('/devices', (req, res) => {
+    particle.getDevices(particleAuthToken).then((result) => {
+        res.status(200).json(_.filter(result, value => {
+            return _.includes(devices, value.id);
+        }));
+    }).catch(response => {
+        console.log(response.options);
+        res.status(response.statusCode).json(response.error);
+    });
+});
+
+router.get('/devices/:id', (req, res) => {
+    particle.getDeviceDetail(particleAuthToken, req.params.id).then(result => {
+        res.status(200).json(result);
+    }).catch(response => {
+        console.log(response.options);
+        res.status(response.statusCode).json(response.error);
     });
 });
 
