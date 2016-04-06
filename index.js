@@ -28,9 +28,7 @@ function getApiStatus() {
     }
 }
 
-app.use(bodyParser.json());
-
-app.use('*', (req, res, next) => {
+function authorizeRequest(req, res, next) {
     if (!req.headers.authorization) {
         res.status(403).json({ status: 403, message: 'No auth token found' });
     }
@@ -40,7 +38,9 @@ app.use('*', (req, res, next) => {
     else {
         next();
     }
-});
+}
+
+app.use(bodyParser.json());
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -52,7 +52,7 @@ router.options('*', (req, res) => {
     res.sendStatus(200);
 });
 
-router.get('/status', (req, res) => {
+router.get('/status', authorizeRequest, (req, res) => {
     res.status(200).json({
         apiStatus: getApiStatus(),
         proxyTokenFound: !!proxyAuthToken,
@@ -61,7 +61,7 @@ router.get('/status', (req, res) => {
     });
 });
 
-router.get('/devices', (req, res) => {
+router.get('/devices', authorizeRequest, (req, res) => {
     particle.getDevices(particleAuthToken).then((result) => {
         res.status(200).json(_.filter(result, value => {
             return _.includes(devices, value.id);
@@ -72,7 +72,7 @@ router.get('/devices', (req, res) => {
     });
 });
 
-router.get('/devices/:id', (req, res) => {
+router.get('/devices/:id', authorizeRequest, (req, res) => {
     particle.getDeviceDetail(particleAuthToken, req.params.id).then(result => {
         res.status(200).json(result);
     }).catch(response => {
@@ -81,7 +81,7 @@ router.get('/devices/:id', (req, res) => {
     });
 });
 
-router.get('/devices/:id/:variable', (req, res) => {
+router.get('/devices/:id/:variable', authorizeRequest, (req, res) => {
     particle.getVariable(particleAuthToken, req.params.id, req.params.variable).then(result => {
         res.status(200).json(result);
     }).catch(response => {
